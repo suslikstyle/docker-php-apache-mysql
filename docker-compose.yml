@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  server:
+    build: .
+    container_name: php-apache
+    networks:
+      - server_network
+    ports:
+      - 9999:80
+    links:
+      - db
+    volumes:
+      - ./www:/var/www/html
+    logging:
+      options:
+        max-size: 2m
+        max-file: "3"
+
+  db:
+    image: mysql:8
+    container_name: php-database
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    networks:
+      - server_network
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./dump:/docker-entrypoint-initdb.d
+      - ./dbdata:/var/lib/mysql
+    logging:
+      options:
+        max-size: 2m
+        max-file: "3"
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: php-pma
+    links: 
+      - db
+    ports:
+      - 9998:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: password
+      PMA_PORT: 3306
+    networks:
+      - server_network
+    depends_on:
+      - server
+      - db
+
+networks:
+  server_network:

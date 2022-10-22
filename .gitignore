@@ -1,0 +1,5 @@
+dbdata/
+www/
+
+!www/info.php
+!www/index.php
